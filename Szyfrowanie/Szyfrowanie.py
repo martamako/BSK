@@ -1,11 +1,10 @@
 import os.path
 
 import rsa
-
+from Crypto.Random import get_random_bytes
 
 class Szyfrowanie:
     def __init__(self):
-        # if not os.path.exists("public.pem") or not os.path.exists("private.pem"):
         if not (os.path.exists("public.pem") and os.path.exists("private.pem")):
             self.creating_keys()
 
@@ -34,3 +33,14 @@ class Szyfrowanie:
         encrypted_message = open("encrypted.message", "rb").read()
         clear_message = rsa.decrypt(encrypted_message, key)
         print(clear_message.decode())
+
+    def sign(self, message: str):
+        signature = rsa.sign(message.encode(), self.__private_key, "SHA-256")
+
+        with open("signature", "wb") as f:
+            f.write(signature)
+
+    def verify(self, message: str):
+        signature = open("signature", "rb").read()
+        verification = rsa.verify(message.encode(), signature, self.__public_key)
+        print(verification)
