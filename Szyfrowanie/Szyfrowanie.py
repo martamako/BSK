@@ -1,18 +1,36 @@
+import os.path
+
 import rsa
 
-with open("public.pem", "rb") as f:
-    public_key = rsa.PublicKey.load_pkcs1(f.read())
 
-with open("private.pem", "rb") as f:
-    private_key = rsa.PrivateKey.load_pkcs1(f.read())
+class Szyfrowanie:
+    def __init__(self):
+        # if not os.path.exists("public.pem") or not os.path.exists("private.pem"):
+        if not (os.path.exists("public.pem") and os.path.exists("private.pem")):
+            self.creating_keys()
 
-#message = "Hello my password is neural_nine999"
-#encrypted_message = rsa.encrypt(message.encode(), public_key)
+        with open("public.pem", "rb") as f:
+            self.__public_key = rsa.PublicKey.load_pkcs1(f.read())
 
-#with open("encrypted.message", "wb") as f:
-#   f.write(encrypted_message)
+        with open("private.pem", "rb") as f:
+            self.__private_key = rsa.PrivateKey.load_pkcs1(f.read())
 
-encrypted_message = open("encrypted.message", "rb").read()
+    def creating_keys(self, key_length: int = 4096):
+        public_key, private_key = rsa.newkeys(key_length)
+        self.write_key_to_file(public_key, "public.pem")
+        self.write_key_to_file(private_key, "private.pem")
 
-clear_message = rsa.decrypt(encrypted_message, private_key)
-print(clear_message.decode())
+    def write_key_to_file(self, key, file_name: str):
+        with open(file_name, "wb") as f:
+            f.write(key.save_pkcs1("PEM"))
+
+    def encode(self, message: str, key):
+        encrypted_message = rsa.encrypt(message.encode(), key)
+
+        with open("encrypted.message", "wb") as f:
+            f.write(encrypted_message)
+
+    def decode(self, key):
+        encrypted_message = open("encrypted.message", "rb").read()
+        clear_message = rsa.decrypt(encrypted_message, key)
+        print(clear_message.decode())
