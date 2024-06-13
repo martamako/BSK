@@ -4,22 +4,27 @@ import tkinter.ttk as ttk
 class Application:
     def __init__(self):
         self.window = Tk()
-
-        self.cb_value = StringVar()
-        self.label_value = StringVar()
-        self.label_value.set("Szyfrowanie")
-
-        self.combobox = ttk.Combobox(self.window, textvariable= self.cb_value)
-        self.combobox.place(x = 50, y = 100)
-        self.combobox['values'] = ("Szyfrowanie", "Deszyfrowanie")
-        self.combobox.current(0)
-        self.combobox.bind("<<ComboboxSelected>>", self.on_selected_changed)
-
-        self.greeting = Label(text=self.label_value)
-
-        self.greeting.pack()
         self.window.geometry("800x600+300+100")
+        self.window.title("Projekt BSK")
+
+        options = ["Szyfrowanie", "Deszyfrowanie"]
+        self.variable = StringVar(self.window)
+        self.variable.set(options[0])
+
+        #w = OptionMenu(self.window, self.variable, *options)
+        #w.place(x=300, y=100)
+        #w.size()
+        #w.pack()
+
+        #button = Button(self.window, text="OK", command=self.ok)
+        #button.place(x=300, y=500)
+
+
+
         self.window.mainloop()
 
-    def on_selected_changed(self, event):
-        self.label_value.set(self.cb_value.get())
+    def ok(self):
+        print("value is:" + self.variable.get())
+
+if __name__ == "__main__":
+    app = Application()
