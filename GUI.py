@@ -41,20 +41,46 @@ class Application:
         self.main_frame.propagate(False)
         self.main_frame.configure(height=400, width=500)
 
+
     def szyfrowanie_page(self):
         self.delete_pages()
         szyfrowanie_frame = Frame(self.main_frame)
 
-        lb = Label(szyfrowanie_frame, text="Szyfrowanie")
-        encrypting_btn = Button(szyfrowanie_frame, text="Szyfrowanie", font=("Bold", 12), fg="#158aff", bd=0, bg="#c3c3c3",
-                                command=self.get_file)
-
+        lb_szyfrowanie = Label(szyfrowanie_frame, text="Wprowadź pin do odszyfrowania klucza")
         self.entry = Entry(szyfrowanie_frame, width=20)
-        self.entry.pack(padx=10, pady=10)
 
-        lb.pack(pady=20)
-        encrypting_btn.pack()
+        lb_szyfrowanie.pack(padx=10, pady=10)
+        self.entry.pack(padx=40, pady=10)
+
+
+        self.document_page()
+        self.key_page()
+
+        encrypting_btn = Button(szyfrowanie_frame, text="Szyfrowanie", font=("Bold", 12), fg="#158aff", bd=0,
+                                bg="#c3c3c3",
+                                command=self.szyfrowanie_file)
+        encrypting_btn.pack(pady=10)
         szyfrowanie_frame.pack(pady=20)
+
+    def document_page(self):
+        document_frame = Frame(self.main_frame)
+
+        lb_document = Label(document_frame, text="Plik do zaszyfrowania")
+        document_btn = Button(document_frame, text="Plik", font=("Bold", 12), fg="#158aff", bd=0, bg="#c3c3c3",
+                              command=lambda: self.choose_file(lb_document))
+        lb_document.pack(pady=10)
+        document_btn.pack()
+        document_frame.pack(pady=10)
+
+    def key_page(self):
+        klucz_frame = Frame(self.main_frame)
+        lb_klucz = Label(klucz_frame, text="Zaszyfrowany klucz prywatny")
+        klucz_btn = Button(klucz_frame, text="Klucz", font=("Bold", 12), fg="#158aff", bd=0, bg="#c3c3c3",
+                           command=lambda: self.choose_key(lb_klucz))
+
+        lb_klucz.pack(pady=10)
+        klucz_btn.pack()
+        klucz_frame.pack(pady=10)
 
     def walidacja_page(self):
         self.delete_pages()
@@ -65,7 +91,6 @@ class Application:
                                 bg="#c3c3c3",
                                 command=self.walidacja)
 
-
         lb.pack(side=LEFT)
         decrypting_btn.pack(padx=20)
         walidacja_frame.pack(pady=20)
@@ -74,18 +99,33 @@ class Application:
         for frame in self.main_frame.winfo_children():
             frame.destroy()
 
-    def ok(self):
-        print("value is:" + self.variable.get())
+    def choose_file(self, label):
+        file_path = askopenfilename(
+            title="Wybierz plik",
+            filetypes=(("Pliki tekstowe", "*.txt"), ("Pliki PDF", "*.pdf"), ("Pliki cpp", "*.cpp"), ("Wszystkie pliki", "*.*"))
+        )
+        if file_path:
+            self.file_path = file_path
+            print(f"Wybrany plik: {file_path}")
+            label.config(text=f"Wybrany plik: {file_path}")
 
-    def get_file(self):
+    def choose_key(self, label):
+        file_path = askopenfilename(
+            title="Wybierz plik",
+            filetypes=(("Pliki tekstowe", "*.pem"), ("Wszystkie pliki", "*.*"))
+        )
+        if file_path:
+            self.key_path = file_path
+            print(f"Wybrany klucz: {file_path}")
+            label.config(text=f"Wybrany klucz: {file_path}")
+
+    def szyfrowanie_file(self):
         entered_text = self.entry.get()
         if entered_text == "":
             print("Brak pinu")
         elif self.szyfrowanie.check_pin(entered_text):
-            filename = askopenfilename()
-            key_name = askopenfilename()
-            self.szyfrowanie.sing_file(filename, key_name)
-            print("Zaszyfrowano plik " + filename)
+            self.szyfrowanie.sing_file(self.file_path, self.key_path)
+            print("Zaszyfrowano plik " + self.file_path)
         print(f'Wprowadzony tekst: {entered_text}')
 
     def walidacja(self):
