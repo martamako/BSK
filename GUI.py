@@ -3,15 +3,24 @@ from tkinter.filedialog import askopenfilename
 
 from Szyfrowanie.Szyfrowanie import Szyfrowanie
 
+
 class Application:
     def __init__(self):
-        self.szyfrowanie = Szyfrowanie()
+        self.file_path = None
+        self.key_path = None
+        self.entry = None
+        self.options_frame = None
+        self.encrypting_btn = None
+        self.validation_btn = None
+        self.signing_btn = None
+        self.window = None
+        self.main_frame = None
+        self.encrypting = Szyfrowanie()
         self.create_window()
-
 
     def create_window(self):
         self.window = Tk()
-        self.window.geometry("500x400+300+100")
+        self.window.geometry("600x500+300+100")
         self.window.title("Projekt BSK")
 
         self.create_menu()
@@ -23,77 +32,86 @@ class Application:
         self.options_frame = Frame(self.window, bg="#c3c3c3")
         self.options_frame.pack(side=LEFT)
         self.options_frame.propagate(False)
-        self.options_frame.configure(width=150, height=400)
+        self.options_frame.configure(width=200, height=500)
 
-        self.encrypting_btn = Button(self.options_frame, text="Szyfrowanie", font=("Bold", 15), fg="#158aff", bd=0,
-                                     bg="#c3c3c3",
-                                     command=self.szyfrowanie_page)
-        self.encrypting_btn.place(x=10, y=100)
+        self.signing_btn = Button(self.options_frame, text="Podpisywanie", font=("Bold", 15), fg="#158aff", bd=0,
+                                  bg="#c3c3c3", command=self.signing_page)
+        self.signing_btn.place(x=10, y=100)
 
-        self.decrypting_btn = Button(self.options_frame, text="Walidacja", font=("Bold", 15), fg="#158aff", bd=0,
-                                     bg="#c3c3c3",
-                                     command=self.walidacja_page)
-        self.decrypting_btn.place(x=10, y=150)
+        self.validation_btn = Button(self.options_frame, text="Walidacja", font=("Bold", 15), fg="#158aff", bd=0,
+                                     bg="#c3c3c3", command=self.validation_page)
+        self.validation_btn.place(x=10, y=150)
+
+        self.encrypting_btn = Button(self.options_frame, text="(De)Szyfrowanie", font=("Bold", 15), fg="#158aff", bd=0,
+                                     bg="#c3c3c3", command=self.encrypting_page)
+        self.encrypting_btn.place(x=10, y=200)
 
     def create_pages(self):
         self.main_frame = Frame(self.window, highlightbackground='black', highlightthickness=2)
         self.main_frame.pack(side=LEFT)
         self.main_frame.propagate(False)
-        self.main_frame.configure(height=400, width=500)
+        self.main_frame.configure(height=500, width=600)
 
-
-    def szyfrowanie_page(self):
+    def signing_page(self):
         self.delete_pages()
-        szyfrowanie_frame = Frame(self.main_frame)
+        signing_frame = Frame(self.main_frame)
 
-        lb_szyfrowanie = Label(szyfrowanie_frame, text="Wprowadź pin do odszyfrowania klucza")
-        self.entry = Entry(szyfrowanie_frame, width=20)
+        lb_szyfrowanie = Label(signing_frame, text="Wprowadź pin do odszyfrowania klucza")
+        self.entry = Entry(signing_frame, width=20)
 
         lb_szyfrowanie.pack(padx=10, pady=10)
         self.entry.pack(padx=40, pady=10)
 
+        self.document_page("Plik do podpisania")
+        self.key_page("Zaszyfrowany klucz prywatny")
 
-        self.document_page()
-        self.key_page()
-
-        encrypting_btn = Button(szyfrowanie_frame, text="Szyfrowanie", font=("Bold", 12), fg="#158aff", bd=0,
-                                bg="#c3c3c3",
-                                command=self.szyfrowanie_file)
+        encrypting_btn = Button(signing_frame, text="Szyfrowanie", font=("Bold", 12), fg="#158aff", bd=0,
+                                bg="#c3c3c3", command=self.encrypting_file)
         encrypting_btn.pack(pady=10)
-        szyfrowanie_frame.pack(pady=20)
+        signing_frame.pack(pady=20)
 
-    def document_page(self):
+    def document_page(self, lb_text: str):
         document_frame = Frame(self.main_frame)
 
-        lb_document = Label(document_frame, text="Plik do zaszyfrowania")
+        lb_document = Label(document_frame, text=lb_text)
         document_btn = Button(document_frame, text="Plik", font=("Bold", 12), fg="#158aff", bd=0, bg="#c3c3c3",
                               command=lambda: self.choose_file(lb_document))
         lb_document.pack(pady=10)
         document_btn.pack()
         document_frame.pack(pady=10)
 
-    def key_page(self):
-        klucz_frame = Frame(self.main_frame)
-        lb_klucz = Label(klucz_frame, text="Zaszyfrowany klucz prywatny")
-        klucz_btn = Button(klucz_frame, text="Klucz", font=("Bold", 12), fg="#158aff", bd=0, bg="#c3c3c3",
-                           command=lambda: self.choose_key(lb_klucz))
+    def key_page(self, key_text: str):
+        key_frame = Frame(self.main_frame)
+        lb_key = Label(key_frame, text=key_text)
+        key_btn = Button(key_frame, text="Klucz", font=("Bold", 12), fg="#158aff", bd=0, bg="#c3c3c3",
+                         command=lambda: self.choose_key(lb_key))
 
-        lb_klucz.pack(pady=10)
-        klucz_btn.pack()
-        klucz_frame.pack(pady=10)
+        lb_key.pack(pady=10)
+        key_btn.pack()
+        key_frame.pack(pady=10)
 
-    def walidacja_page(self):
+    def validation_page(self):
         self.delete_pages()
-        walidacja_frame = Frame(self.main_frame)
+        validation_frame = Frame(self.main_frame)
 
-        lb = Label(walidacja_frame, text="Walidacja")
-        decrypting_btn = Button(walidacja_frame, text="Walidacja", font=("Bold", 12), fg="#158aff", bd=0,
-                                bg="#c3c3c3",
-                                command=self.walidacja)
+        # lb = Label(validation_frame, text="Walidacja")
+        validation_btn = Button(validation_frame, text="Walidacja", font=("Bold", 12), fg="#158aff", bd=0,
+                                bg="#c3c3c3", command=self.validation)
 
-        lb.pack(side=LEFT)
-        decrypting_btn.pack(padx=20)
-        walidacja_frame.pack(pady=20)
+        self.document_page("Plik do weryfikacji")
+        self.key_page("Klucz publiczny")
+        # lb.pack(side=LEFT)
+        validation_btn.pack(padx=20)
+        validation_frame.pack(pady=20)
+
+    def encrypting_page(self):
+        self.delete_pages()
+        encrypting_page = Frame(self.main_frame)
+
+        encrypting_btn = Button(encrypting_page, text="Szyfrowanie", font=("Bold", 12), fg="#158aff", bd=0,
+                                bg="#c3c3c3", command=self.encrypting_file)
+        encrypting_btn.pack(pady=10)
+        encrypting_page.pack(pady=20)
 
     def delete_pages(self):
         for frame in self.main_frame.winfo_children():
@@ -102,7 +120,8 @@ class Application:
     def choose_file(self, label):
         file_path = askopenfilename(
             title="Wybierz plik",
-            filetypes=(("Pliki tekstowe", "*.txt"), ("Pliki PDF", "*.pdf"), ("Pliki cpp", "*.cpp"), ("Wszystkie pliki", "*.*"))
+            filetypes=(
+                ("Pliki tekstowe", "*.txt"), ("Pliki PDF", "*.pdf"), ("Pliki cpp", "*.cpp"), ("Wszystkie pliki", "*.*"))
         )
         if file_path:
             self.file_path = file_path
@@ -119,18 +138,17 @@ class Application:
             print(f"Wybrany klucz: {file_path}")
             label.config(text=f"Wybrany klucz: {file_path}")
 
-    def szyfrowanie_file(self):
+    def encrypting_file(self):
         entered_text = self.entry.get()
         if entered_text == "":
             print("Brak pinu")
-        elif self.szyfrowanie.check_pin(entered_text):
-            self.szyfrowanie.sing_file(self.file_path, self.key_path)
+        elif self.encrypting.check_pin(entered_text):
+            self.encrypting.sing_file(self.file_path, self.key_path)
             print("Zaszyfrowano plik " + self.file_path)
         print(f'Wprowadzony tekst: {entered_text}')
 
-    def walidacja(self):
-        filename = askopenfilename()
-        self.szyfrowanie.verify_file(filename)
+    def validation(self):
+        self.encrypting.verify_file(self.file_path, "output.xml", self.key_path)
 
 
 if __name__ == "__main__":

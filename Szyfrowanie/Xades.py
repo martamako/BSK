@@ -1,6 +1,3 @@
-import base64
-import datetime
-import hashlib
 import os.path
 import pathlib
 import datetime
@@ -17,9 +14,8 @@ class Xades:
     def __init__(self):
         print("Xades")
 
-    def sign(self, file_name: str, signature, hash):
+    def sign(self, file_name: str, signature: str, hash: str):
         data_to_sign = open(file_name, "rb").read()
-
 
         # General identification of the document (size, extension, date of modification)
         f_name = os.path.basename(file_name)
@@ -55,11 +51,20 @@ class Xades:
 
         print(root.find('Signature').text)
 
-
         # printing the text contained within
         # first subtag of the 5th tag from
         # the parent
         # print(root[5][0].text)
+
+    def get_signature_from_xml(self, file_path: str) -> str:
+        try:
+            tree = etree.parse(file_path)
+            root = tree.getroot()
+            signature = root.find('Signature').text
+            print(signature)
+            return signature
+        except:
+            print("Couldn't get signature")
 
 
 if __name__ == "__main__":
