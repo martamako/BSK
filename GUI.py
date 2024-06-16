@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 
-from Szyfrowanie.Szyfrowanie import Szyfrowanie
+from Szyfrowanie.Szyfrowanie import *
 
 
 class Application:
@@ -15,7 +15,6 @@ class Application:
         self.signing_btn = None
         self.window = None
         self.main_frame = None
-        self.encrypting = Szyfrowanie()
         self.create_window()
 
     def create_window(self):
@@ -142,13 +141,13 @@ class Application:
         entered_text = self.entry.get()
         if entered_text == "":
             print("Brak pinu")
-        elif self.encrypting.check_pin(entered_text):
-            self.encrypting.sing_file(self.file_path, self.key_path)
+        elif check_pin(entered_text):
+            sing_file(self.file_path, self.key_path, entered_text)
             print("Zaszyfrowano plik " + self.file_path)
         print(f'Wprowadzony tekst: {entered_text}')
 
     def validation(self):
-        self.encrypting.verify_file(self.file_path, "output.xml", self.key_path)
+        verify_file(self.file_path, "output.xml", self.key_path)
 
 
 if __name__ == "__main__":

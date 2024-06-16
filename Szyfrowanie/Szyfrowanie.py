@@ -1,16 +1,7 @@
 import rsa
-import hashlib
 import base64
-
 from Szyfrowanie import Keys
-from Szyfrowanie.Xades import Xades
-
-
-def document_hash(file_name: str) -> bytes:
-    file_content = open(file_name, "rb").read(65536)
-    file_hash = hashlib.sha256(file_content).digest()
-    file_hash = base64.urlsafe_b64encode(file_hash)
-    return file_hash
+from Szyfrowanie.Xades import *
 
 
 def encrypt_file(file_name: str, public_key: rsa.PublicKey):
@@ -29,64 +20,81 @@ def decrypt_file(file_name: str, private_key: rsa.PrivateKey):
 
 def create_signature(file: bytes, private_key: rsa.PrivateKey) -> str:
     """
-    Function of signing the hash of file, creating signature and returning signature in string type
-    :param file: bytes
-    :param private_key: rsa.PrivateKey
+    Function of signing the file, creating signature and returning signature in string type
+    Signing file - creating hash of file and encrypting it with private key
+    :param file:
+    :param private_key:
     :return: signature_base64: str
     """
-    signature = rsa.sign(file, private_key, "SHA-256") # getting bytes in  b'\xa5\xcf
+    signature = rsa.sign(file, private_key, "SHA-256")  # getting bytes in  b'\xa5\xcf
     signature_base64 = get_str_from_signature(signature)
     return signature_base64
 
 
-def get_str_from_signature(signature: bytes):
+def get_str_from_signature(signature: bytes) -> str:
+    """
+    Function to convert Signature to string
+    :param signature: Signature - encrypted by private key hash of file - in b'\xac\xce' format
+    :return: Signature converted to string from utf-8 format
+    """
     signature_base64 = base64.b64encode(signature)  # getting bytes of signature
     signature_base64 = signature_base64.decode('utf-8')  # getting string of signature
     return signature_base64
 
 
 def get_signature_from_string(signature_base64: str) -> bytes:
+    """
+    Function to convert signature from string to bytes in format b'\\xaa\\xce'
+    :param signature_base64: Signature in string format
+    :return: Signature encoded to utf-8 in format b'\\xaa\\xce'
+    """
     sig = signature_base64.encode('utf-8')  # getting bytes of signature from string
     signature_og = base64.b64decode(sig)  # getting bytes in b'\xa5\xcf
     return signature_og
 
 
-class Szyfrowanie:
-    def __init__(self):
-        self.__pin = '12345'
-        self.__aes_key = Keys.get_key_from_pin(self.__pin)
+def sing_file(file_path: str, key_path: str, pin: str):
+    """
+    Function to sign file with private key and create XML file with information
+    :param file_path: Path to file to sign
+    :param key_path: Path to
+    :return:
+    """
+    file = open(file_path, "rb").read()
+    aes_key = Keys.get_key_from_pin(pin)
+    decrypted_key = Keys.decrypting_key(key_path, aes_key)
+    private_key = rsa.PrivateKey.load_pkcs1(decrypted_key)
+    signature_base64 = create_signature(file, private_key)  # signature of file
 
-        with open("public.pem", "rb") as f:
-            self.__public_key = rsa.PublicKey.load_pkcs1(f.read())
+    sign(file_path, signature_base64)
 
-        self.__xades = Xades()
 
-    def check_pin(self, pin: str):
-        return Keys.get_key_from_pin(pin) == Keys.get_key_from_pin(self.__pin)
+def verify_file(file_path: str, xml_file: str, public_key_path: str) -> bool:
+    """
+    Function verifies if signature of signed file is correct by public key
+    :param file_path: (str) Path of file user wants to verify
+    :param xml_file: str Path to XML signature file containing encrypted by private key hash of file
+    :param public_key_path: str Path to public key file with PEM ext
+    :return: bool Returns if verification was successful
+    """
+    public_key = open(public_key_path, "rb").read()
+    public_key = rsa.PublicKey.load_pkcs1(public_key)
 
-    def sing_file(self, file_name: str, key_path: str):
-        file = open(file_name, "rb").read()
+    file = open(file_path, "rb").read()
 
-        private_key = Keys.decrypting_key(key_path, self.__aes_key)
-        private_key = rsa.PrivateKey.load_pkcs1(private_key)
-        hash_of_file = document_hash(file_name)  # hash of file
+    encrypted_signature = get_signature_from_xml(xml_file)
+    signature = get_signature_from_string(encrypted_signature)
+    verification = rsa.verify(file, signature, public_key)
+    if verification == "SHA-256":
+        print("Signature was verified")
+        return True
+    return False
 
-        signature_base64 = create_signature(file, private_key)  # signature of file
-        encrypted_hash = self.encrypt_hash(hash_of_file, private_key)
-        self.__xades.sign(file_name, signature_base64, encrypted_hash)
-        # there was saving signature to file
 
-    def encrypt_hash(self, hash_of_file: bytes, private_key) -> str:
-        encrypted_hash = rsa.encrypt(hash_of_file, private_key)  # encrypted hash of file
-        encrypted_hash = get_str_from_signature(encrypted_hash)  # str version of encrypted hash of file
-        return encrypted_hash
+def check_pin(pin: str) -> bool:
+    """
 
-    def decrypt_hash(self, encrypted_hash: str, public_key) -> bytes:
-        pass
-
-    def verify_file(self, file_name: str, xml_file: str, private_key: rsa.PrivateKey):
-        file_content = open(file_name, "rb").read()
-        # there was reading signature from file
-        signature = document_hash(file_name)
-        verification = rsa.verify(file_content, signature, private_key)
-        print(verification)
+    :param pin:
+    :return:
+    """
+    return Keys.get_key_from_pin(pin) == Keys.get_key_from_pin("12345")
