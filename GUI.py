@@ -1,6 +1,9 @@
+"""
+This module provides functionality:
+- Creating GUI app emulate electronic signature
+"""
 from tkinter import *
 from tkinter.filedialog import askopenfilename
-
 from Encrypting.Encrypting import *
 
 

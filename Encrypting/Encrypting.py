@@ -1,3 +1,11 @@
+"""
+This module provides functionality:
+- Encrypt/decrypt file
+- Signing the file and writing information to XML file
+- Verifying file with signature read from XML file
+- Checking if provided PIN is correct to decrypt private key
+- Converting signature to string or bytes
+"""
 import rsa
 import base64
 from Encrypting import Keys

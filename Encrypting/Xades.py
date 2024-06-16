@@ -1,3 +1,8 @@
+"""
+This module provides functionality:
+- Writing the information to XML file
+- Getting signature from XML file
+"""
 import os.path
 import pathlib
 import datetime
@@ -6,21 +11,22 @@ from lxml import etree
 
 def add_child(root: etree.Element, name: str, text: str):
     """
-
-    :param root:
-    :param name:
-    :param text:
+    Adding subelement to root with given name and text
+    :param root: Root of XML tree
+    :param name: Name of element
+    :param text: Content of element
     :return:
     """
     element = etree.SubElement(root, name)
     element.text = text
 
 
-def sign(file_name: str, signature: str):
+def sign(file_name: str, signature: str, xml_file_name: str = "output.xml"):
     """
-
-    :param file_name:
-    :param signature:
+    Creating XML with information about signing file.
+    :param file_name: Name of signed file
+    :param signature: Signature created during signing file
+    :param xml_file_name: Name of XML file to which content will be written to. By default, it's 'output.xml'
     :return:
     """
     # General identification of the document (size, extension, date of modification)
@@ -48,20 +54,19 @@ def sign(file_name: str, signature: str):
     print(etree.tostring(root))
 
     tree = etree.ElementTree(root)
-    tree.write('output.xml', pretty_print=True, xml_declaration=True, encoding="utf-8")
+    tree.write(xml_file_name, pretty_print=True, xml_declaration=True, encoding="utf-8")
 
 
 def get_signature_from_xml(file_path: str) -> str:
     """
-
-    :param file_path:
-    :return:
+    Reading XML file and returning signature
+    :param file_path: Path to XML file with signature
+    :return: Signature in string format
     """
     try:
         tree = etree.parse(file_path)
         root = tree.getroot()
         signature = root.find('Signature').text
-        print(signature)
         return signature
-    except :
+    except Exception as e:
         print("Couldn't get signature")
