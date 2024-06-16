@@ -1,3 +1,10 @@
+"""
+This module provides functionality to:
+- generate RSA keys and write them to file,
+- generate AES key from PIN,
+- encrypt and decrypt RSA keys with AES key.
+"""
+
 import base64
 import hashlib
 import os

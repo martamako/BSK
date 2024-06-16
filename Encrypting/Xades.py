@@ -5,12 +5,24 @@ from lxml import etree
 
 
 def add_child(root: etree.Element, name: str, text: str):
+    """
+
+    :param root:
+    :param name:
+    :param text:
+    :return:
+    """
     element = etree.SubElement(root, name)
     element.text = text
-    # root.append(element)
 
 
 def sign(file_name: str, signature: str):
+    """
+
+    :param file_name:
+    :param signature:
+    :return:
+    """
     # General identification of the document (size, extension, date of modification)
     f_name = os.path.basename(file_name)
     file_size = os.path.getsize(file_name)
@@ -40,11 +52,16 @@ def sign(file_name: str, signature: str):
 
 
 def get_signature_from_xml(file_path: str) -> str:
+    """
+
+    :param file_path:
+    :return:
+    """
     try:
         tree = etree.parse(file_path)
         root = tree.getroot()
         signature = root.find('Signature').text
         print(signature)
         return signature
-    except:
+    except :
         print("Couldn't get signature")

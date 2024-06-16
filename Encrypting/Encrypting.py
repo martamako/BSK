@@ -1,30 +1,49 @@
 import rsa
 import base64
-from Szyfrowanie import Keys
-from Szyfrowanie.Xades import *
+from Encrypting import Keys
+from Encrypting.Xades import *
 
 
-def encrypt_file(file_name: str, public_key: rsa.PublicKey):
-    file = open(file_name, "rb").read()
+def encrypt_file(file_path: str, public_key_path: str):
+    """
+    Function to encrypt file using public key. Encrypted file is saved in the same location.
+    :param file_path: Path to file to encrypt.
+    :param public_key_path: Path to public key.
+    :return:
+    """
+    file = open(file_path, "rb").read()
+    key_file = open(public_key_path, "rb").read()
+    public_key = rsa.PublicKey.load_pkcs1(key_file)
     encrypted = rsa.encrypt(file, public_key)
-    with open(file_name, "rb") as f:
+    with open(file_path, "wb") as f:
         f.write(encrypted)
 
 
-def decrypt_file(file_name: str, private_key: rsa.PrivateKey):
-    file = open(file_name, "rb").read()
+def decrypt_file(file_path: str, private_key_path: str, pin: str = "12345"):
+    """
+    Function to decrypt encrypted file using private key. Private key is decrypted by using PIN.
+    :param file_path: Path to file to decrypt.
+    :param private_key_path: Path to private key.
+    :param pin: PIN to decrypt private key. Set to default PIN '12345'
+    :return:
+    """
+    file = open(file_path, "rb").read()
+    aes_key = Keys.get_key_from_pin(pin)
+
+    decrypted_key = Keys.decrypting_key(private_key_path, aes_key)
+    private_key = rsa.PrivateKey.load_pkcs1(decrypted_key)
+
     decrypted = rsa.decrypt(file, private_key)
-    with open(file_name, "rb") as f:
+    with open(file_path, "wb") as f:
         f.write(decrypted)
 
 
 def create_signature(file: bytes, private_key: rsa.PrivateKey) -> str:
     """
     Function of signing the file, creating signature and returning signature in string type
-    Signing file - creating hash of file and encrypting it with private key
-    :param file:
-    :param private_key:
-    :return: signature_base64: str
+    :param file: Read file in "rb" mode.
+    :param private_key: Private key used to sign file with.
+    :return: SIgnature in string format.
     """
     signature = rsa.sign(file, private_key, "SHA-256")  # getting bytes in  b'\xa5\xcf
     signature_base64 = get_str_from_signature(signature)
@@ -57,7 +76,8 @@ def sing_file(file_path: str, key_path: str, pin: str):
     """
     Function to sign file with private key and create XML file with information
     :param file_path: Path to file to sign
-    :param key_path: Path to
+    :param key_path: Path to private key file
+    :param pin: PIN to get AES key to decrypt private key
     :return:
     """
     file = open(file_path, "rb").read()
@@ -93,8 +113,8 @@ def verify_file(file_path: str, xml_file: str, public_key_path: str) -> bool:
 
 def check_pin(pin: str) -> bool:
     """
-
-    :param pin:
-    :return:
+    Function checks if key from input PIN is the same as PIN used to create AES key to encrypt private key
+    :param pin: PIN to get key from
+    :return: True if keys are the same, False if not
     """
     return Keys.get_key_from_pin(pin) == Keys.get_key_from_pin("12345")
