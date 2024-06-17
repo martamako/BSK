@@ -25,6 +25,7 @@ def encrypt_file(file_path: str, public_key_path: str):
     encrypted = rsa.encrypt(file, public_key)
     with open(file_path, "wb") as f:
         f.write(encrypted)
+        print(f"Successful encryption of {file_path}")
 
 
 def decrypt_file(file_path: str, private_key_path: str, pin: str = "12345"):
@@ -44,18 +45,7 @@ def decrypt_file(file_path: str, private_key_path: str, pin: str = "12345"):
     decrypted = rsa.decrypt(file, private_key)
     with open(file_path, "wb") as f:
         f.write(decrypted)
-
-
-def create_signature(file: bytes, private_key: rsa.PrivateKey) -> str:
-    """
-    Function of signing the file, creating signature and returning signature in string type
-    :param file: Read file in "rb" mode.
-    :param private_key: Private key used to sign file with.
-    :return: SIgnature in string format.
-    """
-    signature = rsa.sign(file, private_key, "SHA-256")  # getting bytes in  b'\xa5\xcf
-    signature_base64 = get_str_from_signature(signature)
-    return signature_base64
+        print(f"Successful decryption of {file_path}")
 
 
 def get_str_from_signature(signature: bytes) -> str:
@@ -69,7 +59,7 @@ def get_str_from_signature(signature: bytes) -> str:
     return signature_base64
 
 
-def get_signature_from_string(signature_base64: str) -> bytes:
+def get_signature_from_str(signature_base64: str) -> bytes:
     """
     Function to convert signature from string to bytes in format b'\\xaa\\xce'
     :param signature_base64: Signature in string format
@@ -78,6 +68,18 @@ def get_signature_from_string(signature_base64: str) -> bytes:
     sig = signature_base64.encode('utf-8')  # getting bytes of signature from string
     signature_og = base64.b64decode(sig)  # getting bytes in b'\xa5\xcf
     return signature_og
+
+
+def create_signature(file: bytes, private_key: rsa.PrivateKey) -> str:
+    """
+    Function of signing the file, creating signature and returning signature in string type
+    :param file: Read file in "rb" mode.
+    :param private_key: Private key used to sign file with.
+    :return: SIgnature in string format.
+    """
+    signature = rsa.sign(file, private_key, "SHA-256")  # getting bytes in  b'\xa5\xcf
+    signature_base64 = get_str_from_signature(signature)
+    return signature_base64
 
 
 def sing_file(file_path: str, key_path: str, pin: str):
@@ -111,7 +113,7 @@ def verify_file(file_path: str, xml_file: str, public_key_path: str) -> bool:
     file = open(file_path, "rb").read()
 
     encrypted_signature = get_signature_from_xml(xml_file)
-    signature = get_signature_from_string(encrypted_signature)
+    signature = get_signature_from_str(encrypted_signature)
     verification = rsa.verify(file, signature, public_key)
     if verification == "SHA-256":
         print("Signature was verified")
