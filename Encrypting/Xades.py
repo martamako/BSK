@@ -57,6 +57,13 @@ def sign(file_name: str, signature: str, xml_file_name: str = "output.xml"):
     tree.write(xml_file_name, pretty_print=True, xml_declaration=True, encoding="utf-8")
 
 
+class MissingSignatureError(Exception):
+    """
+    Exception when Signature couldn't be found in XML file
+    """
+    pass
+
+
 def get_signature_from_xml(file_path: str) -> str:
     """
     Reading XML file and returning signature
@@ -66,7 +73,17 @@ def get_signature_from_xml(file_path: str) -> str:
     try:
         tree = etree.parse(file_path)
         root = tree.getroot()
-        signature = root.find('Signature').text
-        return signature
+        signature_element = root.find('Signature')
+        if signature_element is None:
+            raise MissingSignatureError("Element 'Signature' nie został znaleziony w dokumencie XML.")
+        else:
+            signature = signature_element.text
+            return signature
+    except MissingSignatureError as e:
+        print(f"Wystąpił błąd: {e}")
+    except etree.ElementTree.ParseError as e:
+        print(f"Błąd parsowania XML: {e}")
     except Exception as e:
-        print("Couldn't get signature")
+        print(f"Nieoczekiwany błąd: {e}")
+
+
