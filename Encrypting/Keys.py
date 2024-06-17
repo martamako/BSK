@@ -19,7 +19,6 @@ def creating_keys(key_length: int = 4096):
     :return:
     """
     public_key, private_key = rsa.newkeys(key_length)
-
     write_key_to_file(private_key, "private.pem")
     write_key_to_file(public_key, "public.pem")
 
@@ -32,8 +31,6 @@ def get_key_from_pin(pin: str) -> bytes:
     """
     key = hashlib.sha256(pin.encode()).digest()
     key = base64.urlsafe_b64encode(key)
-    #with open("mykey.key", "wb") as f:
-    #    f.write(key)
     return key
 
 
@@ -48,18 +45,19 @@ def write_key_to_file(key, file_name: str):
         f.write(key.save_pkcs1("PEM"))
 
 
-def encrypting_key(aes_key: bytes):
+def encrypting_key(_aes_key: bytes, key_path: str = "private.pem"):
     """
     Function reads private key from file and encrypt it with AES key
-    :param aes_key: Key to encrypting with AES
+    :param _aes_key: Key to encrypting with AES
+    :param key_path:
     :return:
     """
-    with open("private.pem", "rb") as private_pem:
+    with open(key_path, "rb") as private_pem:
         private_key = private_pem.read()
-    key = Fernet(aes_key)
+    key = Fernet(_aes_key)
     encrypted = key.encrypt(private_key)
 
-    with open("private.pem", "wb") as encrypted_file:
+    with open(key_path, "wb") as encrypted_file:
         encrypted_file.write(encrypted)
 
 
@@ -77,7 +75,7 @@ def decrypting_key(key_path: str, _aes_key: bytes, save_to_file: bool = False) -
     private_key = key.decrypt(encrypted)
 
     if save_to_file:
-        with open("private.pem", "wb") as decrypted_file:
+        with open(key_path, "wb") as decrypted_file:
             decrypted_file.write(private_key)
 
     return private_key
