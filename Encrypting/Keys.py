@@ -45,28 +45,33 @@ def write_key_to_file(key, file_name: str):
         f.write(key.save_pkcs1("PEM"))
 
 
-def encrypting_key(_aes_key: bytes, key_path: str = "private.pem"):
+def encrypting_key(_aes_key: bytes, key_path: str = "private.pem", output: str = ""):
     """
     Function reads private key from file and encrypt it with AES key
-    :param _aes_key: Key to encrypting with AES
-    :param key_path:
+    :param _aes_key: AES key to encrypt RSA key
+    :param key_path: Path to file with RSA key
+    :param output: Path to where write encrypted key. If not specified then it's overwriting original file.
     :return:
     """
     with open(key_path, "rb") as private_pem:
         private_key = private_pem.read()
     key = Fernet(_aes_key)
     encrypted = key.encrypt(private_key)
-
-    with open(key_path, "wb") as encrypted_file:
+    if output == "":
+        output = key_path
+    with open(output, "wb") as encrypted_file:
         encrypted_file.write(encrypted)
 
 
-def decrypting_key(key_path: str, _aes_key: bytes, save_to_file: bool = False) -> bytes:
+def decrypting_key(key_path: str, _aes_key: bytes, save_to_file: bool = False, output: str = "") -> bytes:
     """
     Function of decrypting encrypted private key in file and returning decrypted key in bytes
+
     :param key_path: Path to file with private key with PEM extension
     :param _aes_key: AES key
     :param save_to_file: If decrypted key should be saved to file. By default it's False
+    :param output: Path to where write decrypted key.
+    If not specified then it's overwriting original file if save_to_file is set to True.
     :return: Decrypted private key in byts
     """
     with open(key_path, "rb") as encrypted_file:
@@ -75,7 +80,9 @@ def decrypting_key(key_path: str, _aes_key: bytes, save_to_file: bool = False) -
     private_key = key.decrypt(encrypted)
 
     if save_to_file:
-        with open(key_path, "wb") as decrypted_file:
+        if output == "":
+            output = key_path
+        with open(output, "wb") as decrypted_file:
             decrypted_file.write(private_key)
 
     return private_key
