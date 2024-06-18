@@ -82,25 +82,30 @@ class SigningPage(Page):
         self.entry = None
         self.page()
 
-    def page(self):
+    def page(self, text="Encrypting", document_page_str="Plik do podpisania", key_page_str="Zaszyfrowany klucz prywatny"):
         self.delete_pages()
         frame = Frame(self.main_frame)
 
-        label = Label(frame, text="Wprowadź pin do odszyfrowania klucza")
-        self.entry = Entry(frame, width=20)
-
-        label.pack(padx=10, pady=10)
-        self.entry.pack(padx=40, pady=10)
-
         self.document_page("Plik do podpisania")
         self.key_page("Zaszyfrowany klucz prywatny")
+        self.pin_page("Wprowadź pin do odszyfrowania klucza")
 
         button = Button(frame, text="Encrypting", font=("Bold", 12), fg="#158aff", bd=0,
-                        bg="#c3c3c3", command=self.signing_file)
+                        bg="#c3c3c3", command=self.functionality)
         button.pack(pady=10)
         frame.pack(pady=20)
 
-    def signing_file(self):
+    def pin_page(self, text: str):
+        pin_frame = Frame(self.main_frame)
+
+        label = Label(pin_frame, text=text)
+        self.entry = Entry(pin_frame, width=20)
+
+        label.pack(padx=10, pady=10)
+        self.entry.pack(padx=40, pady=10)
+        pin_frame.pack(pady=10)
+
+    def functionality(self):
         entered_text = self.entry.get()
         if entered_text == "":
             print("Brak pinu")
@@ -116,18 +121,7 @@ class ValidationPage(Page):
         # self.page()
 
     def page(self, text="Walidacja", document_page_str="Plik do weryfikacji", key_page_str="Klucz publiczny"):
-        self.delete_pages()
-        frame = Frame(self.main_frame)
-
-        # lb = Label(validation_frame, text="Walidacja")
-        button = Button(frame, text="Walidacja", font=("Bold", 12), fg="#158aff", bd=0,
-                        bg="#c3c3c3", command=self.functionality)
-
-        self.document_page("Plik do weryfikacji")
-        self.key_page("Klucz publiczny")
-        # lb.pack(side=LEFT)
-        button.pack(padx=20)
-        frame.pack(pady=20)
+        super().page(text, document_page_str, key_page_str)
 
     def functionality(self):
         verify_file(self.file_path, "output.xml", self.key_path)
@@ -136,48 +130,22 @@ class ValidationPage(Page):
 class EncryptingPage(Page):
     def __init__(self, main_frame: Frame):
         super().__init__(main_frame)
-        self.encrypting_page()
 
-    def encrypting_page(self):
-        self.delete_pages()
-        frame = Frame(self.main_frame)
-        label = Label(frame, text="Encrypting pliku")
-        label.pack(pady=10)
+    def page(self, text="Encrypting", document_page_str="Plik do zaszyfrowania", key_page_str="Klucz publiczny"):
+        super().page(text, document_page_str, key_page_str)
 
-        self.document_page("Plik do zaszyfrowania")
-        self.key_page("Klucz publiczny")
-
-        encrypting_btn = Button(frame, text="Encrypting", font=("Bold", 12), fg="#158aff", bd=0,
-                                bg="#c3c3c3", command=self.encrypting_file)
-        encrypting_btn.pack(pady=10)
-
-        frame.pack(pady=20)
-
-    def encrypting_file(self):
+    def functionality(self):
         encrypt_file(self.file_path, self.key_path)
 
 
 class DecryptingPage(Page):
     def __init__(self, main_frame: Frame):
         super().__init__(main_frame)
-        self.decrypting_page()
 
-    def decrypting_page(self):
-        self.delete_pages()
-        frame = Frame(self.main_frame)
-        label = Label(frame, text="Deszyfrowanie pliku")
-        label.pack(pady=10)
+    def page(self, text="Odszyfrowanie", document_page_str="Plik do odszyfrowania", key_page_str="Klucz prywatny"):
+        super().page(text, document_page_str, key_page_str)
 
-        self.document_page("Plik do odszyfrowania")
-        self.key_page("Klucz prywatny")
-
-        encrypting_btn = Button(frame, text="Odszyfrowanie", font=("Bold", 12), fg="#158aff", bd=0,
-                                bg="#c3c3c3", command=self.decrypting_file)
-        encrypting_btn.pack(pady=10)
-
-        frame.pack(pady=20)
-
-    def decrypting_file(self):
+    def functionality(self):
         decrypt_file(self.file_path, self.key_path)
 
 
@@ -193,10 +161,10 @@ class App:
         self.validation_page = ValidationPage(self.main_frame)
         self.validation_btn = None
 
-        self.encrypting_p = None
+        self.encrypting_page = EncryptingPage(self.main_frame)
         self.encrypting_btn = None
 
-        self.decrypting_p = None
+        self.decrypting_page = DecryptingPage(self.main_frame)
         self.decrypting_btn = None
 
         self.create_window()
@@ -229,11 +197,11 @@ class App:
         self.validation_btn.place(x=10, y=150)
 
         self.encrypting_btn = Button(self.options_frame, text="Encrypting", font=("Bold", 15), fg="#158aff", bd=0,
-                                     bg="#c3c3c3", command=lambda: EncryptingPage(self.main_frame))
+                                     bg="#c3c3c3", command=self.encrypting_page.page)
         self.encrypting_btn.place(x=10, y=200)
 
         self.decrypting_btn = Button(self.options_frame, text="Deszyfrowanie", font=("Bold", 15), fg="#158aff", bd=0,
-                                     bg="#c3c3c3", command=lambda: DecryptingPage(self.main_frame))
+                                     bg="#c3c3c3", command=self.decrypting_page.page)
         self.decrypting_btn.place(x=10, y=250)
 
 
