@@ -82,15 +82,15 @@ class SigningPage(Page):
         self.entry = None
         self.page()
 
-    def page(self, text="Encrypting", document_page_str="Plik do podpisania", key_page_str="Zaszyfrowany klucz prywatny"):
+    def page(self, text="Podpisanie", document_page_str="Plik do podpisania", key_page_str="Zaszyfrowany klucz prywatny"):
         self.delete_pages()
         frame = Frame(self.main_frame)
 
-        self.document_page("Plik do podpisania")
-        self.key_page("Zaszyfrowany klucz prywatny")
+        self.document_page(document_page_str)
+        self.key_page(key_page_str)
         self.pin_page("Wprowadź pin do odszyfrowania klucza")
 
-        button = Button(frame, text="Encrypting", font=("Bold", 12), fg="#158aff", bd=0,
+        button = Button(frame, text=text, font=("Bold", 12), fg="#158aff", bd=0,
                         bg="#c3c3c3", command=self.functionality)
         button.pack(pady=10)
         frame.pack(pady=20)
