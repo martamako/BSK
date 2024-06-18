@@ -13,7 +13,7 @@ class Page:
     """
     def __init__(self, main_frame: Frame):
         """
-
+        Constructor taking main frame of application's window.
         :param main_frame: Frame created from application's window. It's frame on which all other frames will be placed.
         """
         self.key_path = None
@@ -22,7 +22,8 @@ class Page:
 
     def page(self, text: str, document_page_str: str, key_page_str: str):
         """
-
+        Creating page with text for button, document_page_str for label in document frame
+        and key_page_str for label in key frame.
         :param text: Text that will be on button.
         :param document_page_str: Text displayed on label before button to choose file
         :param key_page_str: Text displayed on label before button to choose file with key
@@ -120,12 +121,23 @@ class Page:
 
 
 class SigningPage(Page):
+    """
+    Subclass of class Page. This class is meant to create page for signing functionality.
+    """
     def __init__(self, main_frame: Frame):
         super().__init__(main_frame)
         self.entry = None
         self.page()
 
     def page(self, text="Podpisanie", document_page_str="Plik do podpisania", key_page_str="Zaszyfrowany klucz prywatny"):
+        """
+        Implementation of method page. Parameters are set to text for signing page functionality.
+        To parent class it also adds enetering PIN to decrypt private key.
+        :param text: Text that will be on button.
+        :param document_page_str: Text displayed on label before button to choose file
+        :param key_page_str: Text displayed on label before button to choose file with key
+        :return:
+        """
         self.delete_pages()
         frame = Frame(self.main_frame)
 
@@ -139,6 +151,11 @@ class SigningPage(Page):
         frame.pack(pady=20)
 
     def pin_page(self, text: str):
+        """
+        Creating page for entering PIN. Takes parameter text to set it to label.
+        :param text: Set text to label.
+        :return:
+        """
         pin_frame = Frame(self.main_frame)
 
         label = Label(pin_frame, text=text)
@@ -149,6 +166,10 @@ class SigningPage(Page):
         pin_frame.pack(pady=10)
 
     def functionality(self):
+        """
+        Provides signing functionality from Encrypting module.
+        :return:
+        """
         entered_text = self.entry.get()
         if entered_text == "":
             print("Brak pinu")
@@ -159,6 +180,9 @@ class SigningPage(Page):
 
 
 class ValidationPage(Page):
+    """
+    Subclass of class Page. This class is meant to create page for validation functionality.
+    """
     def __init__(self, main_frame: Frame):
         super().__init__(main_frame)
         # self.page()
@@ -167,10 +191,17 @@ class ValidationPage(Page):
         super().page(text, document_page_str, key_page_str)
 
     def functionality(self):
+        """
+        Validates chosen file with signature with 'output.xml' with chosen key.
+        :return:
+        """
         verify_file(self.file_path, "output.xml", self.key_path)
 
 
 class EncryptingPage(Page):
+    """
+    Subclass of class Page. This class is meant to create page for encrypting functionality.
+    """
     def __init__(self, main_frame: Frame):
         super().__init__(main_frame)
 
@@ -178,10 +209,17 @@ class EncryptingPage(Page):
         super().page(text, document_page_str, key_page_str)
 
     def functionality(self):
+        """
+        Encrypts chosen file with chosen key.
+        :return:
+        """
         encrypt_file(self.file_path, self.key_path)
 
 
 class DecryptingPage(Page):
+    """
+    Subclass of class Page. This class is meant to create page for decrypting functionality.
+    """
     def __init__(self, main_frame: Frame):
         super().__init__(main_frame)
 
@@ -189,11 +227,21 @@ class DecryptingPage(Page):
         super().page(text, document_page_str, key_page_str)
 
     def functionality(self):
+        """
+        Decrypts chosen file with chosen key.
+        :return:
+        """
         decrypt_file(self.file_path, self.key_path)
 
 
 class App:
+    """
+    Class responsible for creating GUI app
+    """
     def __init__(self):
+        """
+        Creates window and all necessary elements to display app
+        """
         self.window = Tk()
         self.main_frame = Frame(self.window, highlightbackground='black', highlightthickness=2)
         self.options_frame = Frame(self.window, bg="#c3c3c3")
@@ -213,6 +261,10 @@ class App:
         self.create_window()
 
     def create_window(self):
+        """
+        Creates window, calls methods to create menu and main frame.
+        :return:
+        """
         self.window.geometry("600x500+300+100")
         self.window.title("Projekt BSK")
 
@@ -222,11 +274,19 @@ class App:
         self.window.mainloop()
 
     def create_main_frame(self):
+        """
+        Creates main frame and sets design.
+        :return:
+        """
         self.main_frame.pack(side=LEFT)
         self.main_frame.propagate(False)
         self.main_frame.configure(height=500, width=600)
 
     def create_menu(self):
+        """
+        Creates menu and buttons each for different page.
+        :return:
+        """
         self.options_frame.pack(side=LEFT)
         self.options_frame.propagate(False)
         self.options_frame.configure(width=200, height=500)
