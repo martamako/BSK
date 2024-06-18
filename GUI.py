@@ -13,6 +13,23 @@ class Page:
         self.file_path = None
         self.main_frame = main_frame
 
+    def page(self, text: str, document_page_str: str, key_page_str: str):
+        self.delete_pages()
+        frame = Frame(self.main_frame)
+
+        # lb = Label(validation_frame, text="Walidacja")
+        button = Button(frame, text=text, font=("Bold", 12), fg="#158aff", bd=0,
+                        bg="#c3c3c3", command=self.functionality)
+
+        self.document_page(document_page_str)
+        self.key_page(key_page_str)
+        # lb.pack(side=LEFT)
+        button.pack(padx=20)
+        frame.pack(pady=20)
+
+    def functionality(self):
+        pass
+
     def document_page(self, lb_text: str):
         document_frame = Frame(self.main_frame)
 
@@ -63,9 +80,9 @@ class SigningPage(Page):
     def __init__(self, main_frame: Frame):
         super().__init__(main_frame)
         self.entry = None
-        self.signing_page()
+        self.page()
 
-    def signing_page(self):
+    def page(self):
         self.delete_pages()
         frame = Frame(self.main_frame)
 
@@ -96,15 +113,15 @@ class SigningPage(Page):
 class ValidationPage(Page):
     def __init__(self, main_frame: Frame):
         super().__init__(main_frame)
-        self.validation_page()
+        # self.page()
 
-    def validation_page(self):
+    def page(self, text="Walidacja", document_page_str="Plik do weryfikacji", key_page_str="Klucz publiczny"):
         self.delete_pages()
         frame = Frame(self.main_frame)
 
         # lb = Label(validation_frame, text="Walidacja")
         button = Button(frame, text="Walidacja", font=("Bold", 12), fg="#158aff", bd=0,
-                        bg="#c3c3c3", command=self.validation)
+                        bg="#c3c3c3", command=self.functionality)
 
         self.document_page("Plik do weryfikacji")
         self.key_page("Klucz publiczny")
@@ -112,7 +129,7 @@ class ValidationPage(Page):
         button.pack(padx=20)
         frame.pack(pady=20)
 
-    def validation(self):
+    def functionality(self):
         verify_file(self.file_path, "output.xml", self.key_path)
 
 
@@ -166,14 +183,14 @@ class DecryptingPage(Page):
 
 class App:
     def __init__(self):
-        self.window = None
-        self.main_frame = None
-        self.options_frame = None
+        self.window = Tk()
+        self.main_frame = Frame(self.window, highlightbackground='black', highlightthickness=2)
+        self.options_frame = Frame(self.window, bg="#c3c3c3")
 
-        self.signing_p = None
+        self.signing_page = SigningPage(self.main_frame)
         self.signing_btn = None
 
-        self.validation_p = None
+        self.validation_page = ValidationPage(self.main_frame)
         self.validation_btn = None
 
         self.encrypting_p = None
@@ -185,7 +202,6 @@ class App:
         self.create_window()
 
     def create_window(self):
-        self.window = Tk()
         self.window.geometry("600x500+300+100")
         self.window.title("Projekt BSK")
 
@@ -194,45 +210,31 @@ class App:
 
         self.window.mainloop()
 
+    def create_main_frame(self):
+        self.main_frame.pack(side=LEFT)
+        self.main_frame.propagate(False)
+        self.main_frame.configure(height=500, width=600)
+
     def create_menu(self):
-        self.options_frame = Frame(self.window, bg="#c3c3c3")
         self.options_frame.pack(side=LEFT)
         self.options_frame.propagate(False)
         self.options_frame.configure(width=200, height=500)
 
         self.signing_btn = Button(self.options_frame, text="Podpisywanie", font=("Bold", 15), fg="#158aff", bd=0,
-                                  bg="#c3c3c3", command=self.signing_page)
+                                  bg="#c3c3c3", command=self.signing_page.page)
         self.signing_btn.place(x=10, y=100)
 
         self.validation_btn = Button(self.options_frame, text="Walidacja", font=("Bold", 15), fg="#158aff", bd=0,
-                                     bg="#c3c3c3", command=self.validation_page)
+                                     bg="#c3c3c3", command=self.validation_page.page)
         self.validation_btn.place(x=10, y=150)
 
         self.encrypting_btn = Button(self.options_frame, text="Encrypting", font=("Bold", 15), fg="#158aff", bd=0,
-                                     bg="#c3c3c3", command=self.encrypting_page)
+                                     bg="#c3c3c3", command=lambda: EncryptingPage(self.main_frame))
         self.encrypting_btn.place(x=10, y=200)
 
         self.decrypting_btn = Button(self.options_frame, text="Deszyfrowanie", font=("Bold", 15), fg="#158aff", bd=0,
-                                     bg="#c3c3c3", command=self.decrypting_page)
+                                     bg="#c3c3c3", command=lambda: DecryptingPage(self.main_frame))
         self.decrypting_btn.place(x=10, y=250)
-
-    def create_main_frame(self):
-        self.main_frame = Frame(self.window, highlightbackground='black', highlightthickness=2)
-        self.main_frame.pack(side=LEFT)
-        self.main_frame.propagate(False)
-        self.main_frame.configure(height=500, width=600)
-
-    def signing_page(self):
-        self.signing_p = SigningPage(self.main_frame)
-
-    def validation_page(self):
-        self.validation_p = ValidationPage(self.main_frame)
-
-    def encrypting_page(self):
-        self.encrypting_p = EncryptingPage(self.main_frame)
-
-    def decrypting_page(self):
-        self.decrypting_p = DecryptingPage(self.main_frame)
 
 
 if __name__ == "__main__":
