@@ -8,29 +8,51 @@ from Encrypting.Encrypting import *
 
 
 class Page:
+    """
+    Class Page is base class for creating pages with different functionalities.
+    """
     def __init__(self, main_frame: Frame):
+        """
+
+        :param main_frame: Frame created from application's window. It's frame on which all other frames will be placed.
+        """
         self.key_path = None
         self.file_path = None
         self.main_frame = main_frame
 
     def page(self, text: str, document_page_str: str, key_page_str: str):
+        """
+
+        :param text: Text that will be on button.
+        :param document_page_str: Text displayed on label before button to choose file
+        :param key_page_str: Text displayed on label before button to choose file with key
+        :return:
+        """
         self.delete_pages()
         frame = Frame(self.main_frame)
 
-        # lb = Label(validation_frame, text="Walidacja")
         button = Button(frame, text=text, font=("Bold", 12), fg="#158aff", bd=0,
                         bg="#c3c3c3", command=self.functionality)
 
         self.document_page(document_page_str)
         self.key_page(key_page_str)
-        # lb.pack(side=LEFT)
+
         button.pack(padx=20)
         frame.pack(pady=20)
 
     def functionality(self):
+        """
+        In base class it's abstract method. Implementation in subclasses.
+        :return:
+        """
         pass
 
     def document_page(self, lb_text: str):
+        """
+        Method to create frame with elements to choose file for functionality.
+        :param lb_text: Text that will be displayed on label before button to choose file
+        :return:
+        """
         document_frame = Frame(self.main_frame)
 
         lb_document = Label(document_frame, text=lb_text)
@@ -41,6 +63,11 @@ class Page:
         document_frame.pack(pady=10)
 
     def key_page(self, key_text: str):
+        """
+        Method to create frame with elements to choose file with key.
+        :param key_text: Text that will be displayed on label before button to choose file with key
+        :return:
+        """
         key_frame = Frame(self.main_frame)
         lb_key = Label(key_frame, text=key_text)
         key_btn = Button(key_frame, text="Klucz", font=("Bold", 12), fg="#158aff", bd=0, bg="#c3c3c3",
@@ -51,10 +78,20 @@ class Page:
         key_frame.pack(pady=10)
 
     def delete_pages(self):
+        """
+        Deletes pages from main frame to leave it empty for new page
+        :return:
+        """
         for frame in self.main_frame.winfo_children():
             frame.destroy()
 
     def choose_file(self, label: Label):
+        """
+        Function to choose file for functionality and changing text of label to include chosen file.
+        Sets file_path to path of chosen file for further processing in functionality.
+        :param label: Label to put text after choosing file
+        :return:
+        """
         file_path = askopenfilename(
             title="Wybierz plik",
             filetypes=(
@@ -66,6 +103,12 @@ class Page:
             label.config(text=f"Wybrany plik: {file_path}")
 
     def choose_key(self, label):
+        """
+        Function to choose file with key and changing text of label to include chosen key.
+        Sets key_path to path of chosen key for further processing in functionality.
+        :param label: Label to put text after choosing key
+        :return:
+        """
         file_path = askopenfilename(
             title="Wybierz plik",
             filetypes=(("Pliki tekstowe", "*.pem"), ("Wszystkie pliki", "*.*"))
@@ -131,7 +174,7 @@ class EncryptingPage(Page):
     def __init__(self, main_frame: Frame):
         super().__init__(main_frame)
 
-    def page(self, text="Encrypting", document_page_str="Plik do zaszyfrowania", key_page_str="Klucz publiczny"):
+    def page(self, text="Szyfrowanie", document_page_str="Plik do zaszyfrowania", key_page_str="Klucz publiczny"):
         super().page(text, document_page_str, key_page_str)
 
     def functionality(self):
@@ -196,7 +239,7 @@ class App:
                                      bg="#c3c3c3", command=self.validation_page.page)
         self.validation_btn.place(x=10, y=150)
 
-        self.encrypting_btn = Button(self.options_frame, text="Encrypting", font=("Bold", 15), fg="#158aff", bd=0,
+        self.encrypting_btn = Button(self.options_frame, text="Szyfrowanie", font=("Bold", 15), fg="#158aff", bd=0,
                                      bg="#c3c3c3", command=self.encrypting_page.page)
         self.encrypting_btn.place(x=10, y=200)
 
