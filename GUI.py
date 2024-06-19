@@ -5,6 +5,7 @@ This module provides functionality:
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 
+from cryptography.fernet import InvalidToken
 from rsa import VerificationError
 
 from Encrypting.Encrypting import *
@@ -22,6 +23,7 @@ class Page:
         Constructor taking main frame of application's window.
         :param main_frame: Frame created from application's window. It's frame on which all other frames will be placed.
         """
+        self.lb_inf = None
         self.lb_usb = None
         self.key_path = None
         self.file_path = None
@@ -46,9 +48,9 @@ class Page:
         self.delete_pages()
         frame = Frame(self.main_frame)
 
+        self.lb_inf = Label(frame, text="Information")
         self.lb_usb = Label(frame, text="USB device: ")
         self.set_usb_label(connected_usb)
-        self.lb_usb.pack(pady=10)
 
         button = Button(frame, text=text, font=("Bold", 12), fg="#158aff", bd=0,
                         bg="#c3c3c3", command=self.functionality)
@@ -56,8 +58,10 @@ class Page:
         self.document_page(document_page_str)
         self.key_page(key_page_str)
 
-        button.pack(padx=20)
+        self.lb_usb.pack(pady=10)
+        self.lb_inf.pack(pady=10)
         frame.pack(pady=20)
+        button.pack(pady=20)
 
     def functionality(self):
         """
@@ -177,6 +181,7 @@ class SigningPage(Page):
         self.delete_pages()
         frame = Frame(self.main_frame)
 
+        self.lb_inf = Label(frame, text="Information")
         self.lb_usb = Label(frame, text="USB device: ")
         self.set_usb_label(connected_usb)
         self.lb_usb.pack(pady=10)
@@ -187,6 +192,8 @@ class SigningPage(Page):
 
         button = Button(frame, text=text, font=("Bold", 12), fg="#158aff", bd=0,
                         bg="#c3c3c3", command=self.functionality)
+
+        self.lb_inf.pack(pady=10)
         button.pack(pady=10)
         frame.pack(pady=20)
 
@@ -212,11 +219,19 @@ class SigningPage(Page):
         """
         entered_text = self.entry.get()
         if entered_text == "":
+            self.lb_inf.config(text="Brak pinu")
             print("Brak pinu")
         elif check_pin(entered_text):
-            sing_file(self.file_path, self.key_path, entered_text)
-            print("Zaszyfrowano plik " + self.file_path)
-            self.window.iconphoto(False, self.icon)
+            try:
+                sing_file(self.file_path, self.key_path, entered_text)
+                print("Zaszyfrowano plik " + self.file_path)
+                self.window.iconphoto(False, self.icon)
+                self.lb_inf.config(text="Podpisano plik")
+            except InvalidToken as e:
+                print(e)
+                self.lb_inf.config(text="Nieprawidłowy klucz prywatny")
+        else:
+            self.lb_inf.config(text="Zły pin")
         print(f'Wprowadzony tekst: {entered_text}')
 
 
@@ -243,6 +258,7 @@ class ValidationPage(Page):
         self.xml_btn = Button(frame, text="Plik", font=("Bold", 12), fg="#158aff", bd=0, bg="#c3c3c3",
                               command=lambda: self.choose_file(self.lb_xml))
 
+        self.lb_inf = Label(frame, text="Information")
         self.lb_usb = Label(frame, text="USB device: ")
         self.set_usb_label(connected_usb)
 
@@ -251,9 +267,11 @@ class ValidationPage(Page):
 
         button = Button(frame, text=text, font=("Bold", 12), fg="#158aff", bd=0,
                         bg="#c3c3c3", command=self.functionality)
+
         self.lb_xml.pack(pady=10)
         self.xml_btn.pack(pady=10)
         self.lb_usb.pack(pady=10)
+        self.lb_inf.pack(pady=10)
         button.pack(pady=10)
         frame.pack(pady=20)
 
@@ -310,9 +328,12 @@ class EncryptingPage(Page):
         Encrypts chosen file with chosen key.
         :return:
         """
-        result = encrypt_file(self.file_path, self.key_path)
-        if result:
+        try:
+            encrypt_file(self.file_path, self.key_path)
             self.window.iconphoto(False, self.icon)
+            self.lb_inf.config(text="Plik zaszyfrowany")
+        except Exception as e:
+            self.lb_inf.config(text=e)
 
 
 class DecryptingPage(Page):
@@ -334,9 +355,12 @@ class DecryptingPage(Page):
         Decrypts chosen file with chosen key.
         :return:
         """
-        result = decrypt_file(self.file_path, self.key_path)
-        if result:
+        try:
+            decrypt_file(self.file_path, self.key_path)
             self.window.iconphoto(False, self.icon)
+            self.lb_inf.config(text="Plik odszyfrowany")
+        except Exception as e:
+            self.lb_inf.config(text=e)
 
 
 class App:
