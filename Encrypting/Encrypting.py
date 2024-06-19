@@ -17,7 +17,7 @@ def encrypt_file(file_path: str, public_key_path: str) -> bool:
     Function to encrypt file using public key. Encrypted file is saved in the same location.
     :param file_path: Path to file to encrypt.
     :param public_key_path: Path to public key.
-    :return:
+    :return: True if file was successfully encrypted
     """
     file = open(file_path, "rb").read()
     key_file = open(public_key_path, "rb").read()
@@ -35,7 +35,7 @@ def decrypt_file(file_path: str, private_key_path: str, pin: str = "12345") -> b
     :param file_path: Path to file to decrypt.
     :param private_key_path: Path to private key.
     :param pin: PIN to decrypt private key. Set to default PIN '12345'
-    :return:
+    :return: True if file was successfully decrypted
     """
     file = open(file_path, "rb").read()
     aes_key = Keys.get_key_from_pin(pin)
@@ -77,7 +77,7 @@ def create_signature(file: bytes, private_key: rsa.PrivateKey) -> str:
     Function of signing the file, creating signature and returning signature in string type
     :param file: Read file in "rb" mode.
     :param private_key: Private key used to sign file with.
-    :return: SIgnature in string format.
+    :return: Signature in string format.
     """
     signature = rsa.sign(file, private_key, "SHA-256")  # getting bytes in  b'\xa5\xcf
     signature_base64 = get_str_from_signature(signature)
@@ -90,7 +90,7 @@ def sing_file(file_path: str, key_path: str, pin: str) -> bool:
     :param file_path: Path to file to sign
     :param key_path: Path to private key file
     :param pin: PIN to get AES key to decrypt private key
-    :return:
+    :return: True if file was successfully signed
     """
     file = open(file_path, "rb").read()
     aes_key = Keys.get_key_from_pin(pin)
