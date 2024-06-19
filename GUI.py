@@ -334,6 +334,10 @@ class App:
         self.window.mainloop()
 
     def find_pendrive(self) -> bool:
+        """
+        Method for going through connected devices and returning True if pendrive is connected to PC>
+        :return: True if pendrive is connected to PC, False if otherwise.
+        """
         connected_devices = self.monitor.get_available_devices()
         for device in connected_devices:
             usb_class = connected_devices[device]['ID_USB_CLASS_FROM_DATABASE']
@@ -342,20 +346,32 @@ class App:
         return False
 
     def on_connect(self, device_id, device_info):
+        """
+        Method that will be called when device is connected
+        :param device_id:
+        :param device_info:
+        :return:
+        """
         # self.show_message("USB Device Added", f"Device added: {device_info}")
         print(f"Connected: {self.device_info_str(device_info=device_info)}")
         self.connected_usb = True
         self.current_page.set_usb_label(self.connected_usb)
 
     def on_disconnect(self, device_id, device_info):
+        """
+        Method that will be called when device is connected
+        :param device_id:
+        :param device_info:
+        :return:
+        """
         # self.show_message("USB Device Removed", f"Device removed: {device_info}")
         print(f"Disconnected: {self.device_info_str(device_info=device_info)}")
         self.connected_usb = False
         self.current_page.set_usb_label(self.connected_usb)
 
-    def show_message(self, title, message):
-        # Schedule the message box display on the main thread
-        self.window.after(0, lambda: messagebox.showinfo(title, message))
+    # def show_message(self, title, message):
+    #     # Schedule the message box display on the main thread
+    #     self.window.after(0, lambda: messagebox.showinfo(title, message))
 
     def create_window(self):
         """
@@ -407,6 +423,12 @@ class App:
         self.decrypting_btn.place(x=10, y=250)
 
     def button_click(self, page: Page):
+        """
+        Method that is done after clicking button. Sets class attribute current_page to page that is connected to button
+        Calls method page on current_page with argument connected_usb if pendrive is connected.
+        :param page: Subclass of class page.
+        :return:
+        """
         self.current_page = page
         self.current_page.page(connected_usb=self.connected_usb)
 
