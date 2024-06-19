@@ -3,8 +3,10 @@ This module provides functionality:
 - Creating GUI app emulate electronic signature
 """
 from tkinter import *
-from tkinter import messagebox
 from tkinter.filedialog import askopenfilename
+
+from rsa import VerificationError
+
 from Encrypting.Encrypting import *
 from usbmonitor import USBMonitor
 from usbmonitor.attributes import ID_MODEL, ID_MODEL_ID, ID_VENDOR_ID
@@ -20,7 +22,7 @@ class Page:
         Constructor taking main frame of application's window.
         :param main_frame: Frame created from application's window. It's frame on which all other frames will be placed.
         """
-        self.label = None
+        self.lb_usb = None
         self.key_path = None
         self.file_path = None
         self.main_frame = main_frame
@@ -44,9 +46,9 @@ class Page:
         self.delete_pages()
         frame = Frame(self.main_frame)
 
-        self.label = Label(frame, text="USB device: ")
+        self.lb_usb = Label(frame, text="USB device: ")
         self.set_usb_label(connected_usb)
-        self.label.pack(pady=10)
+        self.lb_usb.pack(pady=10)
 
         button = Button(frame, text=text, font=("Bold", 12), fg="#158aff", bd=0,
                         bg="#c3c3c3", command=self.functionality)
@@ -113,7 +115,8 @@ class Page:
         file_path = askopenfilename(
             title="Wybierz plik",
             filetypes=(
-                ("Pliki tekstowe", "*.txt"), ("Pliki PDF", "*.pdf"), ("Pliki cpp", "*.cpp"), ("Wszystkie pliki", "*.*"))
+                ("Pliki tekstowe", "*.txt"), ("Pliki PDF", "*.pdf"), ("Pliki cpp", "*.cpp"), ("Pliki XML", "*.xml"),
+                ("Wszystkie pliki", "*.*"))
         )
         if file_path:
             self.file_path = file_path
@@ -143,9 +146,9 @@ class Page:
         :return:
         """
         if connected:
-            self.label.config(text=f"USB device connected")
+            self.lb_usb.config(text=f"USB device connected")
         else:
-            self.label.config(text="USB device disconnected")
+            self.lb_usb.config(text="USB device disconnected")
 
 
 class SigningPage(Page):
@@ -174,9 +177,9 @@ class SigningPage(Page):
         self.delete_pages()
         frame = Frame(self.main_frame)
 
-        self.label = Label(frame, text="USB device: ")
+        self.lb_usb = Label(frame, text="USB device: ")
         self.set_usb_label(connected_usb)
-        self.label.pack(pady=10)
+        self.lb_usb.pack(pady=10)
 
         self.document_page(document_page_str)
         self.key_page(key_page_str)
@@ -224,22 +227,68 @@ class ValidationPage(Page):
 
     def __init__(self, main_frame: Frame):
         super().__init__(main_frame)
+        self.xml_path = None
+        self.xml_btn = None
+        self.lb_xml = None
         self.icon = PhotoImage(file='icons/validation.png')
         self.window = main_frame.winfo_toplevel()
         # self.page()
 
     def page(self, text="Walidacja", document_page_str="Plik do weryfikacji",
-             key_page_str="Klucz publiczny",  connected_usb: bool = False):
-        super().page(text, document_page_str, key_page_str, connected_usb)
+             key_page_str="Klucz publiczny", connected_usb: bool = False):
+        self.delete_pages()
+        frame = Frame(self.main_frame)
+
+        self.lb_xml = Label(frame, text="Plik z signaturą")
+        self.xml_btn = Button(frame, text="Plik", font=("Bold", 12), fg="#158aff", bd=0, bg="#c3c3c3",
+                              command=lambda: self.choose_file(self.lb_xml))
+
+        self.lb_usb = Label(frame, text="USB device: ")
+        self.set_usb_label(connected_usb)
+
+        self.document_page(document_page_str)
+        self.key_page(key_page_str)
+
+        button = Button(frame, text=text, font=("Bold", 12), fg="#158aff", bd=0,
+                        bg="#c3c3c3", command=self.functionality)
+        self.lb_xml.pack(pady=10)
+        self.xml_btn.pack(pady=10)
+        self.lb_usb.pack(pady=10)
+        button.pack(pady=10)
+        frame.pack(pady=20)
 
     def functionality(self):
         """
         Validates chosen file with signature with 'output.xml' with chosen key.
         :return:
         """
-        result = verify_file(self.file_path, "output.xml", self.key_path)
-        if result:
-            self.window.iconphoto(False, self.icon)
+        if self.xml_path is None:
+            self.xml_path = "output.xml"
+        try:
+            result = verify_file(self.file_path, self.xml_path, self.key_path)
+            if result:
+                self.window.iconphoto(False, self.icon)
+        except VerificationError as e:
+            print(f"Validation was unseccessful because: {e}")
+        except TypeError as e:
+            print(f"Validation was unseccessful because: {e}")
+
+    def choose_xml_file(self, label: Label):
+        """
+        Function to choose file for functionality and changing text of label to include chosen file.
+        Sets file_path to path of chosen file for further processing in functionality.
+        :param label: Label to put text after choosing file
+        :return:
+        """
+        file_path = askopenfilename(
+            title="Wybierz plik",
+            filetypes=(
+                ("Pliki XML", "*.xml"), ("Wszystkie pliki", "*.*"))
+        )
+        if file_path:
+            self.xml_path = file_path
+            print(f"Wybrany plik: {file_path}")
+            label.config(text=f"Wybrany plik: {file_path}")
 
 
 class EncryptingPage(Page):
@@ -253,7 +302,7 @@ class EncryptingPage(Page):
         self.window = main_frame.winfo_toplevel()
 
     def page(self, text="Szyfrowanie", document_page_str="Plik do zaszyfrowania",
-             key_page_str="Klucz publiczny",  connected_usb: bool = False):
+             key_page_str="Klucz publiczny", connected_usb: bool = False):
         super().page(text, document_page_str, key_page_str, connected_usb)
 
     def functionality(self):
