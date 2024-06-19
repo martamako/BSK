@@ -6,7 +6,6 @@ from tkinter import *
 from tkinter.filedialog import askopenfilename
 
 from cryptography.fernet import InvalidToken
-from rsa import VerificationError
 
 from Encrypting.Encrypting import *
 from usbmonitor import USBMonitor
@@ -256,7 +255,7 @@ class ValidationPage(Page):
 
         self.lb_xml = Label(frame, text="Plik z signaturą")
         self.xml_btn = Button(frame, text="Plik", font=("Bold", 12), fg="#158aff", bd=0, bg="#c3c3c3",
-                              command=lambda: self.choose_file(self.lb_xml))
+                              command=lambda: self.choose_xml_file(self.lb_xml))
 
         self.lb_inf = Label(frame, text="Information")
         self.lb_usb = Label(frame, text="USB device: ")
@@ -286,9 +285,12 @@ class ValidationPage(Page):
             result = verify_file(self.file_path, self.xml_path, self.key_path)
             if result:
                 self.window.iconphoto(False, self.icon)
-        except VerificationError as e:
+                self.lb_inf.config(text="Walidacja przeszła pomyślnie")
+        except ValueError as e:
+            self.lb_inf.config(text="Zły klucz publiczny")
             print(f"Validation was unseccessful because: {e}")
-        except TypeError as e:
+        except rsa.pkcs1.VerificationError as e:
+            self.lb_inf.config(text="Nie można znaleźć sygnatury")
             print(f"Validation was unseccessful because: {e}")
 
     def choose_xml_file(self, label: Label):
@@ -333,7 +335,7 @@ class EncryptingPage(Page):
             self.window.iconphoto(False, self.icon)
             self.lb_inf.config(text="Plik zaszyfrowany")
         except Exception as e:
-            self.lb_inf.config(text=e)
+            self.lb_inf.config(text="Zły klucz publiczny")
 
 
 class DecryptingPage(Page):
@@ -360,7 +362,7 @@ class DecryptingPage(Page):
             self.window.iconphoto(False, self.icon)
             self.lb_inf.config(text="Plik odszyfrowany")
         except Exception as e:
-            self.lb_inf.config(text=e)
+            self.lb_inf.config(text="Zły klucz prywatny")
 
 
 class App:
