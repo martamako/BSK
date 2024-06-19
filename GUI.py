@@ -19,6 +19,12 @@ class Page:
         self.key_path = None
         self.file_path = None
         self.main_frame = main_frame
+        self.icon = PhotoImage(file='icons/default.png')
+        self.window = main_frame.winfo_toplevel()
+
+    def set_icon(self):
+        icon = PhotoImage(file='icons/default.png')
+        self.window.iconphoto(False, icon)
 
     def page(self, text: str, document_page_str: str, key_page_str: str):
         """
@@ -85,6 +91,7 @@ class Page:
         """
         for frame in self.main_frame.winfo_children():
             frame.destroy()
+        self.set_icon()
 
     def choose_file(self, label: Label):
         """
@@ -126,6 +133,8 @@ class SigningPage(Page):
     """
     def __init__(self, main_frame: Frame):
         super().__init__(main_frame)
+        self.icon = PhotoImage(file='icons/signing.png')
+        self.window = main_frame.winfo_toplevel()
         self.entry = None
         self.page()
 
@@ -176,6 +185,7 @@ class SigningPage(Page):
         elif check_pin(entered_text):
             sing_file(self.file_path, self.key_path, entered_text)
             print("Zaszyfrowano plik " + self.file_path)
+            self.window.iconphoto(False, self.icon)
         print(f'Wprowadzony tekst: {entered_text}')
 
 
@@ -185,6 +195,8 @@ class ValidationPage(Page):
     """
     def __init__(self, main_frame: Frame):
         super().__init__(main_frame)
+        self.icon = PhotoImage(file='icons/validation.png')
+        self.window = main_frame.winfo_toplevel()
         # self.page()
 
     def page(self, text="Walidacja", document_page_str="Plik do weryfikacji", key_page_str="Klucz publiczny"):
@@ -195,7 +207,9 @@ class ValidationPage(Page):
         Validates chosen file with signature with 'output.xml' with chosen key.
         :return:
         """
-        verify_file(self.file_path, "output.xml", self.key_path)
+        result = verify_file(self.file_path, "output.xml", self.key_path)
+        if result:
+            self.window.iconphoto(False, self.icon)
 
 
 class EncryptingPage(Page):
@@ -204,6 +218,8 @@ class EncryptingPage(Page):
     """
     def __init__(self, main_frame: Frame):
         super().__init__(main_frame)
+        self.icon = PhotoImage(file='icons/encryption.png')
+        self.window = main_frame.winfo_toplevel()
 
     def page(self, text="Szyfrowanie", document_page_str="Plik do zaszyfrowania", key_page_str="Klucz publiczny"):
         super().page(text, document_page_str, key_page_str)
@@ -213,7 +229,9 @@ class EncryptingPage(Page):
         Encrypts chosen file with chosen key.
         :return:
         """
-        encrypt_file(self.file_path, self.key_path)
+        result = encrypt_file(self.file_path, self.key_path)
+        if result:
+            self.window.iconphoto(False, self.icon)
 
 
 class DecryptingPage(Page):
@@ -222,6 +240,8 @@ class DecryptingPage(Page):
     """
     def __init__(self, main_frame: Frame):
         super().__init__(main_frame)
+        self.icon = PhotoImage(file='icons/decryption.png')
+        self.window = main_frame.winfo_toplevel()
 
     def page(self, text="Odszyfrowanie", document_page_str="Plik do odszyfrowania", key_page_str="Klucz prywatny"):
         super().page(text, document_page_str, key_page_str)
@@ -231,7 +251,9 @@ class DecryptingPage(Page):
         Decrypts chosen file with chosen key.
         :return:
         """
-        decrypt_file(self.file_path, self.key_path)
+        result = decrypt_file(self.file_path, self.key_path)
+        if result:
+            self.window.iconphoto(False, self.icon)
 
 
 class App:
