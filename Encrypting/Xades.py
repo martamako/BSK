@@ -21,7 +21,7 @@ def add_child(root: etree.Element, name: str, text: str):
     element.text = text
 
 
-def sign(file_name: str, signature: str, xml_file_name: str = "output.xml"):
+def sign(file_name: str, signature: str, xml_file_name: str = "output.xml") -> bool:
     """
     Creating XML with information about signing file.
     :param file_name: Name of signed file
@@ -55,6 +55,7 @@ def sign(file_name: str, signature: str, xml_file_name: str = "output.xml"):
 
     tree = etree.ElementTree(root)
     tree.write(xml_file_name, pretty_print=True, xml_declaration=True, encoding="utf-8")
+    return True
 
 
 class MissingSignatureError(Exception):

@@ -12,7 +12,7 @@ from Encrypting import Keys
 from Encrypting.Xades import *
 
 
-def encrypt_file(file_path: str, public_key_path: str):
+def encrypt_file(file_path: str, public_key_path: str) -> bool:
     """
     Function to encrypt file using public key. Encrypted file is saved in the same location.
     :param file_path: Path to file to encrypt.
@@ -26,9 +26,10 @@ def encrypt_file(file_path: str, public_key_path: str):
     with open(file_path, "wb") as f:
         f.write(encrypted)
         print(f"Successful encryption of {file_path}")
+        return True
 
 
-def decrypt_file(file_path: str, private_key_path: str, pin: str = "12345"):
+def decrypt_file(file_path: str, private_key_path: str, pin: str = "12345") -> bool:
     """
     Function to decrypt encrypted file using private key. Private key is decrypted by using PIN.
     :param file_path: Path to file to decrypt.
@@ -46,6 +47,7 @@ def decrypt_file(file_path: str, private_key_path: str, pin: str = "12345"):
     with open(file_path, "wb") as f:
         f.write(decrypted)
         print(f"Successful decryption of {file_path}")
+        return True
 
 
 def get_str_from_signature(signature: bytes) -> str:
@@ -82,7 +84,7 @@ def create_signature(file: bytes, private_key: rsa.PrivateKey) -> str:
     return signature_base64
 
 
-def sing_file(file_path: str, key_path: str, pin: str):
+def sing_file(file_path: str, key_path: str, pin: str) -> bool:
     """
     Function to sign file with private key and create XML file with information
     :param file_path: Path to file to sign
@@ -96,7 +98,10 @@ def sing_file(file_path: str, key_path: str, pin: str):
     private_key = rsa.PrivateKey.load_pkcs1(decrypted_key)
     signature_base64 = create_signature(file, private_key)  # signature of file
 
-    sign(file_path, signature_base64)
+    result = sign(file_path, signature_base64)
+    if result:
+        return True
+    return False
 
 
 def verify_file(file_path: str, xml_file: str, public_key_path: str) -> bool:
